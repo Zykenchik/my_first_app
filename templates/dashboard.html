@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Панель управления доставками{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="bi bi-truck"></i> Управление доставками</h4>
+                <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addModal">
+                    <i class="bi bi-plus-circle"></i> Добавить доставку
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Адрес</th>
+                                <th>Курьер</th>
+                                <th>Получатель</th>
+                                <th>Описание</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if deliveries %}
+                                {% for delivery in deliveries %}
+                                <tr>
+                                    <td>{{ delivery.id }}</td>
+                                    <td>{{ delivery.address }}</td>
+                                    <td>{{ delivery.courier }}</td>
+                                    <td>{{ delivery.recipient }}</td>
+                                    <td>{{ delivery.description }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" onclick="editDelivery({{ delivery.id }}, '{{ delivery.address }}', '{{ delivery.courier }}', '{{ delivery.recipient }}', '{{ delivery.description }}')">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <form method="POST" action="{{ url_for('delete_delivery', id=delivery.id) }}" style="display: inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Вы уверены, что хотите удалить эту запись?')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        <i class="bi bi-inbox"></i> Нет записей о доставках. Добавьте первую запись!
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('add_delivery') }}">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Добавить доставку</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="add_address" class="form-label">Адрес</label>
+                        <input type="text" class="form-control" id="add_address" name="address" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="add_courier" class="form-label">Курьер</label>
+                        <input type="text" class="form-control" id="add_courier" name="courier" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="add_recipient" class="form-label">Получатель</label>
+                        <input type="text" class="form-control" id="add_recipient" name="recipient" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="add_description" class="form-label">Описание</label>
+                        <textarea class="form-control" id="add_description" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="editForm">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title"><i class="bi bi-pencil"></i> Редактировать доставку</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_address" class="form-label">Адрес</label>
+                        <input type="text" class="form-control" id="edit_address" name="address" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_courier" class="form-label">Курьер</label>
+                        <input type="text" class="form-control" id="edit_courier" name="courier" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_recipient" class="form-label">Получатель</label>
+                        <input type="text" class="form-control" id="edit_recipient" name="recipient" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_description" class="form-label">Описание</label>
+                        <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-warning">Сохранить изменения</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function editDelivery(id, address, courier, recipient, description) {
+    document.getElementById('editForm').action = "{{ url_for('update_delivery', id=0) }}".replace('0', id);
+    document.getElementById('edit_address').value = address;
+    document.getElementById('edit_courier').value = courier;
+    document.getElementById('edit_recipient').value = recipient;
+    document.getElementById('edit_description').value = description;
+    
+    var editModal = new bootstrap.Modal(document.getElementById('editModal'));
+    editModal.show();
+}
+</script>
+{% endblock %}
