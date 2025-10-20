@@ -4,6 +4,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 import bcrypt
 from supabase import create_client, Client
 from dotenv import load_dotenv
+from supabase_helper import normalize_supabase_url
 
 load_dotenv()
 
@@ -14,13 +15,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-supabase_url = os.environ.get('SUPABASE_URL')
+supabase_url = normalize_supabase_url(os.environ.get('SUPABASE_URL'))
 supabase_key = os.environ.get('SUPABASE_KEY')
-
-if supabase_url and 'postgresql://' in supabase_url:
-    parts = supabase_url.split('@')[1].split(':')[0].split('.')
-    project_ref = parts[0].replace('postgres.', '')
-    supabase_url = f'https://{project_ref}.supabase.co'
 
 supabase: Client = create_client(supabase_url, supabase_key)
 
