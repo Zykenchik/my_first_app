@@ -16,6 +16,12 @@ login_manager.login_view = 'login'
 
 supabase_url = os.environ.get('SUPABASE_URL')
 supabase_key = os.environ.get('SUPABASE_KEY')
+
+if supabase_url and 'postgresql://' in supabase_url:
+    parts = supabase_url.split('@')[1].split(':')[0].split('.')
+    project_ref = parts[0].replace('postgres.', '')
+    supabase_url = f'https://{project_ref}.supabase.co'
+
 supabase: Client = create_client(supabase_url, supabase_key)
 
 class User(UserMixin):
